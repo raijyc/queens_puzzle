@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>The 8 Queens Puzzle</title>
+    <style>
+        /* Define the chessboard container */
+        .chessboard {
+            display: grid;
+            grid-template-columns: repeat(8, 50px);
+            grid-template-rows: repeat(8, 50px);
+        }
+
+        /* Define the shaded and unshaded squares */
+        .square {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            border: 1px solid #333;
+            cursor: pointer; /* Add cursor style to indicate it's clickable */
+        }
+
+        .shaded {
+            background: #769656;
+        }
+
+        .unshaded {
+            background: #eeeed2;
+        }
+
+        .queen {
+            color: #000; /* Set the queen's color to black */
+            text-align: center;
+        }
+
+        .unsafe-queen {
+            color: #ff0000; /* Set the color of unsafe queens to red */
+        }
+    </style>
+</head>
+<body>
+    <h1>The 8 Queens Puzzle</h1>
+    <div class="chessboard" id="board">
+    </div>
+
+    <button id="clearButton" onclick="clearAllQueens()">Clear All Queens</button> <!-- "Clear All" button -->
+    <button id="restartButton" style="display: none;" onclick="restartGame()">Restart</button> <!-- "Restart" button -->
+    <p id="message"></p> <!-- Add an element for displaying the message -->
+
+    <script>
+        const board = document.getElementById("board");
+        const boardSize = 8;
+        let queensPlaced = 0;
+        const boardState = new Array(boardSize).fill(null).map(() => new Array(boardSize).fill(false));
+
+        // Create the chessboard grid with alternating shaded and unshaded squares
+        for (let row = 0; row < boardSize; row++) {
+            for (let col = 0; col < boardSize; col++) {
+                const square = document.createElement("div");
+                square.className = `square ${row % 2 === col % 2 ? 'shaded' : 'unshaded'}`;
+                square.onclick = function() {
+                    if (queensPlaced < boardSize) {
+                        if (boardState[row][col]) {
+                            removeQueen(row, col);
+                        } else {
+                            placeQueen(row, col);
+                        }
+                    }
+                };
+                board.appendChild(square);
+            }
+        }
+
+        function isSafe(row, col) {
+            // Check row and column
+            for (let i = 0; i < boardSize; i++) {
+                if (boardState[row][i] || boardState[i][col]) {
+                    return false;
+                }
+            }
+
+            // Check diagonals
+            for (let i = row, j = col; i >= 0 && j >= 0; i--, j--) {
+                if (boardState[i][j]) {
+                    return false;
+                }
+            }
+            for (let i = row, j = col; i >= 0 && j < boardSize; i--, j++) {
+                if (boardState[i][j]) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+        
+
+        function placeQueen(row, col) {
+            if (queensPlaced < boardSize) {
+                if (isSafe(row, col)) {
+                    const queen = document.createElement("div");
+                    queen.className = "queen";
+                    queen.innerHTML = "&#9813"; // Unicode for a queen chess piece
+                    queensPlaced++;
+                    boardState[row][col] = true;
+                    board.children[row * boardSize + col].appendChild(queen);
+
+                    // Update the message with the count of correctly placed queens
+                    const message = document.getElementById("message");
+                    message.textContent = `Queens Placed: ${queensPlaced} out of 8`;
+
+                    if (queensPlaced === boardSize) {
+                        document.getElementById("clearButton").style.display = "none"; // Hide "Clear" button
+                        document.getElementById("restartButton").style.display = "inline"; // Show "Restart" button
+                        message.textContent = "Congratulations! You solved the 8 queens puzzle.";
+                    }
+                } else {
+                    const queen = document.createElement("div");
+                    queen.className = "queen unsafe-queen";
+                    queen.innerHTML = "&#9813"; // Unicode for a queen chess piece
+                    queensPlaced++;
+                    boardState[row][col] = true;
+                    board.children[row * boardSize + col].appendChild(queen);
+                    message.textContent = `Queens Placed: ${queensPlaced} out of 8`;
+                }
+            }
+        }
+
+        function removeQueen(row, col) {
+            if (queensPlaced > 0) {
+                if (boardState[row][col]) {
+                    const square = board.children[row * boardSize + col];
+                    square.removeChild(square.firstChild);
+                    boardState[row][col] = false;
+                    queensPlaced--;
+
+                    // Hide the "Restart" button when queens are removed
+                    document.getElementById("restartButton").style.display = "none";
+                    const message = document.getElementById("message");
+                    message.textContent = `Queens Placed: ${queensPlaced} out of 8`;
+                }
+            }
+        }
+
+        function clearAllQueens() {
+            for (let row = 0; row < boardSize; row++) {
+                for (let col = 0; col < boardSize; col++) {
+                    removeQueen(row, col);
+                }
+            }
+
+            // Hide the "Restart" button when queens are cleared
+            document.getElementById("restartButton").style.display = "none";
+
+            // Clear the message
+            const message = document.getElementById("message");
+            message.textContent = "";
+        }
+
+        function restartGame() {
+            // Reset the game by clearing all queens and hiding the "Restart" button
+            clearAllQueens();
+        
+            // Show the "Clear All Queens" button
+            document.getElementById("clearButton").style.display = "inline";
+        
+            // Hide the "Restart" button
+            document.getElementById("restartButton").style.display = "none";
+        
+            // Clear the message
+            const message = document.getElementById("message");
+            message.textContent = "";
+        }
+        
+    </script>
+</body>
+</html>
